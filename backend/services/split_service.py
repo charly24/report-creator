@@ -58,6 +58,7 @@ FORMAT_PROMPT = """あなたは有能な秘書です。自身のアウトプッ�
 """
 
 async def split_text(text: str) -> list:
+    # return [{'start': '長岡 諒 00:13', 'timestamp': '00:13', 'topic': '導入'}, {'start': '長岡 諒 03:32', 'timestamp': '03:32', 'topic': '職業機能の定義'}, {'start': '長岡 諒 18:46', 'timestamp': '18:46', 'topic': 'want toの特定'}, {'start': '長岡 諒 47:37', 'timestamp': '47:37', 'topic': 'Goal設定'}, {'start': '長岡 諒 56:57', 'timestamp': '56:57', 'topic': '自分ごと化'}]
     # return json.loads('[{"start": "ああ、だめです。ありがとうございます、本日は。", "timestamp": "00:10", "token": "3512", "topic": "導入"}, {"start": "はい。 今、 広 告 制 作 に、 もう 30 年 ぐ らい か。", "timestamp": "08:29", "token": "4180", "topic": "職業機能の定義"}, {"start": "そうですね。 な お か つ、 価 値 提 供 でき て る こと ですね。", "timestamp": "13:36", "token": "5820", "topic": "want toの特定"}, {"start": "そうだ な。", "timestamp": "44:23", "token": "3960", "topic": "Goal設定"}, {"start": "そうですね。 田 中 さん と ど んな ふ う に した い か って のは。", "timestamp": "01:05:59", "token": "1380", "topic": "自分ごと化"}]')
     try:
         response = format_model.generate_content(FORMAT_PROMPT + str(text))

@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-def pares_segments(input_text, segments) -> List[Dict[str, str]]:
+async def pares_segments(input_text, segments) -> List[Dict[str, str]]:
     # 結果を格納するリスト
     result = []
     
@@ -30,7 +30,7 @@ def pares_segments(input_text, segments) -> List[Dict[str, str]]:
             'text': segment_text,
             'timestamp': segment['timestamp'],
             'topic': segment['topic'],
-            'token': segment['token']
+            # 'token': segment['token']
         })
     
     return result

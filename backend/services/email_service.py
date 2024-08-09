@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-def send_email(to_email: str, content: str):
+async def send_email(to_email: str, content: str):
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     smtp_username = os.getenv("SMTP_USERNAME")

@@ -6,9 +6,10 @@ from services.format_service import format_text
 async def process_text(input_text: str) -> str:
     # Step 1: Split the text
     split_segments = await split_text(input_text)
+    print(split_segments)
 
     # Step 2: Format each split part
-    segments = pares_segments(input_text, split_segments)
+    segments = await pares_segments(input_text, split_segments)
     formatted_parts = []
     for segment in segments:
         formatted_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')

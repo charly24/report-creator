@@ -35,6 +35,8 @@ async def process_text_endpoint(
     api_key: str = Depends(verify_api_key)
 ):
     try:
+        # await send_email(request.email, '<h2>test</h2><p>ほげら</p><h2>test2</h2><p>ぷぎゃ</p>')
+        # 1 / 0
         # with open('asada.txt', 'r', encoding='utf-8') as file:
         #     text = file.read()
         #     print(len(text))
@@ -46,7 +48,6 @@ async def process_text_endpoint(
             # request.splitting_prompt,
             # request.formatting_prompt
         )
-        print(result)
         await send_email(request.email, result)
         return {"message": "Text processed and email sent successfully"}
     except ValueError as ve:

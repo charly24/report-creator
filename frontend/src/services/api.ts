@@ -1,4 +1,4 @@
-const API_URL = 'https://your-cloud-function-url.com';
+const API_URL = "http://localhost:8000/process_text";
 
 export const processText = async (
   inputText: string,
@@ -8,13 +8,13 @@ export const processText = async (
   apiKey: string
 ): Promise<void> => {
   const response = await fetch(API_URL, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
+      "Content-Type": "application/json",
+      "X-API-Key": "hoge",
     },
     body: JSON.stringify({
-      inputText,
+      input_text: inputText,
       splittingPrompt,
       formattingPrompt,
       email,
@@ -23,6 +23,10 @@ export const processText = async (
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'An error occurred while processing the text.');
+    throw new Error(
+      errorData.message ||
+        errorData.detail ||
+        "An error occurred while processing the text."
+    );
   }
 };

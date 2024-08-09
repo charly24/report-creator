@@ -15,8 +15,9 @@ async def process_text(input_text: str) -> str:
         formatted_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(f"{formatted_time} {segment['topic']} start -> {len(segment['text'])}")
         formatted_part = await format_text(segment['text'])
-        title = f"## {segment['topic']} ({segment['timestamp']}~)"
-        text = title + "\n\n" + formatted_part
+        title = f"{segment['topic']} ({segment['timestamp']}~)"
+        html_text = formatted_part.replace('\n', '<br>')
+        text = f"<h2>{title}</h2><p>{html_text}</p>"
         formatted_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(f"{formatted_time} {segment['topic']} end -> {len(text)}")
         formatted_parts.append(text)

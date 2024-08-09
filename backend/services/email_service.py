@@ -14,8 +14,8 @@ async def send_email(to_email: str, content: str):
     message["From"] = from_email
     message["To"] = to_email
     message["Subject"] = "Formatted Text Result"
-
-    message.attach(MIMEText(content, "plain"))
+    
+    message.attach(MIMEText(content, "html"))
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()

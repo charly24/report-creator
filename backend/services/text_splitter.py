@@ -1,4 +1,7 @@
+import tiktoken
 from typing import List, Dict
+
+encoding = tiktoken.get_encoding("cl100k_base")
 
 async def pares_segments(input_text, segments) -> List[Dict[str, str]]:
     # 結果を格納するリスト
@@ -30,7 +33,7 @@ async def pares_segments(input_text, segments) -> List[Dict[str, str]]:
             'text': segment_text,
             'timestamp': segment['timestamp'],
             'topic': segment['topic'],
-            # 'token': segment['token']
+            'token': len(encoding.encode(segment_text)),
         })
     
     return result

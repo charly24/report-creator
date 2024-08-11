@@ -5,18 +5,20 @@ import os
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+
 class Segment(typing.TypedDict):
     start: str
     timestamp: str
     topic: str
     token: str
 
+
 format_model = genai.GenerativeModel(
-    model_name=os.getenv("GEMINI_MODEL_PRO"), 
+    model_name=os.getenv("GEMINI_MODEL_PRO"),
     generation_config={
         "response_mime_type": "application/json",
-        "response_schema": list[Segment]
-    }
+        "response_schema": list[Segment],
+    },
 )
 
 FORMAT_PROMPT = """
@@ -92,6 +94,7 @@ FORMAT_PROMPT = """
 
 # # 入力文
 # """
+
 
 async def split_text(text: str) -> list:
     try:

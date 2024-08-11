@@ -70,6 +70,7 @@ Xさんとしてワクワクするイメージになります？
 # 入力文
 """
 
+
 async def format_text(text: str) -> str:
     try:
         response = model.generate_content(FORMAT_PROMPT + str(text))

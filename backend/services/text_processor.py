@@ -6,6 +6,7 @@ import tiktoken
 
 encoding = tiktoken.get_encoding("cl100k_base")
 
+
 async def process_text(input_text: str) -> str:
     # Step 1: Split the text
     split_segments = await split_text(input_text)
@@ -15,17 +16,19 @@ async def process_text(input_text: str) -> str:
     segments = await pares_segments(input_text, split_segments)
     formatted_parts = []
     for segment in segments:
-        formatted_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+        formatted_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
         print(f"{formatted_time} {segment['topic']} start -> {segment['token']} token")
-        formatted_part = await format_text(segment['text'])
+        formatted_part = await format_text(segment["text"])
         title = f"{segment['topic']} ({segment['timestamp']}~)"
-        html_text = formatted_part.replace('\n', '<br>')
+        html_text = formatted_part.replace("\n", "<br>")
         text = f"<h2>{title}</h2><p>{html_text}</p>"
-        formatted_time = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
-        print(f"{formatted_time} {segment['topic']} end -> {len(encoding.encode(text))} token")
+        formatted_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+        print(
+            f"{formatted_time} {segment['topic']} end -> {len(encoding.encode(text))} token"
+        )
         formatted_parts.append(text)
-    
+
     # Step 3: Combine formatted parts
     result = "\n\n".join(formatted_parts)
-    
+
     return result

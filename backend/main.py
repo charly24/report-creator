@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import logging
@@ -23,16 +24,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class TextProcessRequest(BaseModel):
     input_text: str
     # splitting_prompt: str
     # formatting_prompt: str
     email: str
 
+
 @app.post("/process_text")
 async def process_text_endpoint(
-    request: TextProcessRequest,
-    api_key: str = Depends(verify_api_key)
+    request: TextProcessRequest, api_key: str = Depends(verify_api_key)
 ):
     try:
         text = request.input_text
@@ -51,11 +53,14 @@ async def process_text_endpoint(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
+
 if __name__ == "__main__":
     import asyncio
     import multiprocessing
+
     logging.basicConfig(level=logging.INFO)
     multiprocessing.set_start_method("fork")
     asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

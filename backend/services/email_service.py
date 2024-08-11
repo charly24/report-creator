@@ -3,6 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
+
 async def send_email(to_email: str, content: str):
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
@@ -14,7 +15,7 @@ async def send_email(to_email: str, content: str):
     message["From"] = from_email
     message["To"] = to_email
     message["Subject"] = "Formatted Text Result"
-    
+
     message.attach(MIMEText(content, "html"))
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:

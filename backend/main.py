@@ -35,11 +35,6 @@ async def process_text_endpoint(
     api_key: str = Depends(verify_api_key)
 ):
     try:
-        # await send_email(request.email, '<h2>test</h2><p>ほげら</p><h2>test2</h2><p>ぷぎゃ</p>')
-        # 1 / 0
-        # with open('asada.txt', 'r', encoding='utf-8') as file:
-        #     text = file.read()
-        #     print(len(text))
         text = request.input_text
         print(f"Start: {len(text)}")
         result = await process_text(
@@ -53,13 +48,8 @@ async def process_text_endpoint(
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        # traceback.print_stack()
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8080)
 
 if __name__ == "__main__":
     import asyncio

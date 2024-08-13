@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import os
 import logging
 import traceback
 
@@ -19,15 +20,13 @@ from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 firebase_admin.initialize_app()
 
 app = Flask(__name__)
-origins = ["https://mindset-a7e03.web.app"]
-cors = CORS(app, resources={r"/*": {"origins": origins}})
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+origins = [os.getenv("CORS_ORIGIN"), "http://localhost:3000"]
+cors = CORS(
+    app,
+    resources={
+        r"/*": {"origins": origins, "allow_headers": ["Content-Type", "X-API-Key"]}
+    },
+)
 
 
 class TextProcessRequest(BaseModel):

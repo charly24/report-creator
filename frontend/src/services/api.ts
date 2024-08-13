@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:8000/process_text";
+const API_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://on-request-ehm3c6ii6q-uc.a.run.app";
 
 export const processText = async (
   inputText: string,
@@ -11,7 +14,7 @@ export const processText = async (
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-Key": "hoge",
+      "X-API-Key": apiKey,
     },
     body: JSON.stringify({
       input_text: inputText,
@@ -29,4 +32,11 @@ export const processText = async (
         "An error occurred while processing the text."
     );
   }
+};
+
+export const getPrompt = async (): Promise<{
+  splitting: string;
+  formatting: string;
+}> => {
+  return { splitting: "splitting", formatting: "formatting" };
 };

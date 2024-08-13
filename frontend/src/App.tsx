@@ -3,14 +3,18 @@ import TextInput from "./components/TextInput";
 import PromptInput from "./components/PromptInput";
 import EmailInput from "./components/EmailInput";
 import ApiKeyInput from "./components/ApiKeyInput";
-import { processText } from "./services/api";
+import CustomizePrompt from "./components/CustomizePrompt";
+import { processText, getPrompt } from "./services/api";
 
 const App: React.FC = () => {
   const [inputText, setInputText] = useState("");
+  const [isCustomizePtompt, setIsCustomizePtompt] = useState(false);
   const [splittingPrompt, setSplittingPrompt] = useState("");
   const [formattingPrompt, setFormattingPrompt] = useState("");
-  const [email, setEmail] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  const [email, setEmail] = useState(
+    process.env.NODE_ENV === "development" ? "ryo.nagaoka@gmail.com" : ""
+  );
+  const [apiKey, setApiKey] = useState("mindset2024");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,19 +52,6 @@ const App: React.FC = () => {
         <TextInput value={inputText} onChange={setInputText} />
 
         <div className="flex space-x-4">
-          <PromptInput
-            label="Splitting Prompt"
-            value={splittingPrompt}
-            onChange={setSplittingPrompt}
-          />
-          <PromptInput
-            label="Formatting Prompt"
-            value={formattingPrompt}
-            onChange={setFormattingPrompt}
-          />
-        </div>
-
-        <div className="flex space-x-4">
           <div className="flex-1">
             <EmailInput value={email} onChange={setEmail} />
           </div>
@@ -68,6 +59,28 @@ const App: React.FC = () => {
             <ApiKeyInput value={apiKey} onChange={setApiKey} />
           </div>
         </div>
+
+        <CustomizePrompt
+          onPromptUpdate={(splitting, formatting) => {
+            setSplittingPrompt(splitting);
+            setFormattingPrompt(formatting);
+          }}
+          onChange={setIsCustomizePtompt}
+        />
+        {isCustomizePtompt && (
+          <div className="flex space-x-4">
+            <PromptInput
+              label="Splitting Prompt"
+              value={splittingPrompt}
+              onChange={setSplittingPrompt}
+            />
+            <PromptInput
+              label="Formatting Prompt"
+              value={formattingPrompt}
+              onChange={setFormattingPrompt}
+            />
+          </div>
+        )}
 
         <button
           type="submit"

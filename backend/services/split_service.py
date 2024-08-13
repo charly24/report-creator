@@ -99,7 +99,6 @@ FORMAT_PROMPT = """
 async def split_text(text: str) -> list:
     try:
         response = format_model.generate_content(FORMAT_PROMPT + str(text))
+        return json.loads(response.text)
     except Exception as e:
         raise ValueError(f"Error splitting text: {str(e)}")
-
-    return json.loads(response.text)

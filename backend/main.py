@@ -4,25 +4,30 @@ load_dotenv()
 
 import logging
 import traceback
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
+
+import firebase_admin
+
+# from auth.api_key import verify_api_key
+from firebase_functions import https_fn, options
+from flask import Flask, request
+from flask_cors import CORS
 from pydantic import BaseModel
-from auth.api_key import verify_api_key
-from services.text_processor import process_text
 from services.email_service import send_email
+from services.text_processor import process_text
+from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 
-app = FastAPI()
+firebase_admin.initialize_app()
 
-origins = [
-    "http://localhost:3000",
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = Flask(__name__)
+origins = ["https://mindset-a7e03.web.app"]
+cors = CORS(app, resources={r"/*": {"origins": origins}})
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 class TextProcessRequest(BaseModel):
@@ -32,35 +37,38 @@ class TextProcessRequest(BaseModel):
     email: str
 
 
-@app.post("/process_text")
-async def process_text_endpoint(
-    request: TextProcessRequest, api_key: str = Depends(verify_api_key)
-):
+@app.post("/")
+async def process_text_endpoint():
     try:
-        text = request.input_text
+        request_data = request.get_json()
+        text_request = TextProcessRequest(**request_data)
+        text = text_request.input_text
         print(f"Start: {len(text)}")
-        result = await process_text(
-            text
-            # request.input_text,
-            # request.splitting_prompt,
-            # request.formatting_prompt
-        )
-        await send_email(request.email, result)
+        result = await process_text(text)
+        await send_email(text_request.email, result)
         return {"message": "Text processed and email sent successfully"}
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=str(ve))
+        raise BadRequest(str(ve))
     except Exception as e:
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+        raise InternalServerError(f"An error occurred: {str(e)}")
+
+
+@app.get("/test")
+async def hoge():
+    await send_email("ryo.nagaoka@gmail.com", "test")
+    return "test"
+
+
+options.set_global_options(timeout_sec=600)
+
+
+@https_fn.on_request()
+def on_request(req: https_fn.Request) -> https_fn.Response:
+    with app.request_context(req.environ):
+        return app.full_dispatch_request()
 
 
 if __name__ == "__main__":
-    import asyncio
-    import multiprocessing
-
     logging.basicConfig(level=logging.INFO)
-    multiprocessing.set_start_method("fork")
-    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    app.run(debug=True, port=8000)

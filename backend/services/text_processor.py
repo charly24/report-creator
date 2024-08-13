@@ -1,13 +1,26 @@
 from datetime import datetime
+
+import sentry_sdk
+import tiktoken
+from services.format_service import format_text
 from services.split_service import split_text
 from services.text_splitter import pares_segments
-from services.format_service import format_text
-import tiktoken
 
 encoding = tiktoken.get_encoding("cl100k_base")
 
 
-async def process_text(input_text: str) -> str:
+def track_input_length(email, input_text):
+    text_length = len(input_text)
+
+    # SentryのメトリクスにGaugeとして値を送信
+    sentry_sdk.metrics.gauge(
+        key="input_text_length", value=text_length, tags={"email": email}
+    )
+
+
+async def process_text(email: str, input_text: str) -> str:
+    track_input_length(email, input_text)
+    # transaction = sentry_sdk.Sentry.startTransaction({ name: "アプリ起動" });
     # Step 1: Split the text
     split_segments = await split_text(input_text)
     print(split_segments)

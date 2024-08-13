@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 tiktoken==0.7.0
 firebase==4.0.1
 firebase-functions==0.4.2
+sentry-sdk==2.12.0

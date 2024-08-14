@@ -71,9 +71,14 @@ Xさんとしてワクワクするイメージになります？
 """
 
 
-async def format_text(text: str) -> str:
+async def format_text(text: str, cnt: int = 0) -> str:
     try:
         response = model.generate_content(FORMAT_PROMPT + str(text))
         return response.text
     except Exception as e:
-        return {"error": str(e)}
+        if cnt < 3 and "429" not in str(e):
+            print(
+                f"Format時にエラーが発生したので再実行します({cnt + 1}回目): {str(e)}"
+            )
+            return await format_text(text, cnt + 1)
+        raise e

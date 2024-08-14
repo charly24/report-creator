@@ -37,7 +37,8 @@ FORMAT_PROMPT = """
 * ある程度のtopic別に区切ってください。topicと、startにはtopicが始まる行の先頭15文字、文章にタイムスタンプはある場合とない場合がありますがある場合はそのタイムスタンプ、topic内に含まれるtoken数を出力してください。
 * startは、入力文と同じ文字を使ってください。その値を利用して後続プロセスで分割するので、存在しない文字列だとエラーになるため重要です。
 * 60分のセッションだと4~5個くらいに分割される想定で、小さく分割しすぎず、できるだけ1topic毎に最大トークン数に近くなるよう分割してください。
-* 1つのtopicで30分以上かかっている場合、最大トークン長を超えることが多いので分割してください
+* 1つのtopicで30分以上かかっている場合、最大トークン長を超えることが多いので分割してください。
+* 重要: 分割しすぎないようにして、最大でも8分割以内に抑えてください。基本的に5分割でOKですし、300分を超える文字起こしは想定していません。
 * **分割基準:** 文構造、時間経過、キーワード頻度などを複合的に判断し、文脈の切れ目で分割します。
 * **出力:**
   * start: セグメントの先頭15文字
@@ -70,8 +71,10 @@ async def split_text(text: str, cnt: int = 0) -> list:
         response = format_model.generate_content(FORMAT_PROMPT + str(text))
         return json.loads(response.text)
     except Exception as e:
-        if cnt < 3:
-            print("Split時にエラーが発生したので再実行します: ", str(e))
+        if cnt < 3 and "429" not in str(e):
+            print(
+                f"Split時にエラーが発生したので再実行します({cnt + 1}回目): {str(e)} "
+            )
             return await split_text(
                 f"{text}\n\n**前回実行時エラー内容**\n{str(e)}", cnt + 1
             )

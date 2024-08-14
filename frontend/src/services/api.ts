@@ -27,9 +27,7 @@ export const processText = async (
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(
-      errorData.message ||
-        errorData.detail ||
-        "An error occurred while processing the text."
+      errorData.description || "An error occurred while processing the text."
     );
   }
 };

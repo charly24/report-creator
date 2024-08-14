@@ -86,6 +86,7 @@ async def process_text_endpoint():
         sentry_sdk.capture_exception(ve)
         raise BadRequest(str(ve))
     except Exception as e:
+        sentry_sdk.capture_exception(e)
         traceback.print_exc()
         raise InternalServerError(f"An error occurred: {str(e)}")
 

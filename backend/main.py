@@ -2,27 +2,35 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-import os
 import json
 import logging
+import os
 import traceback
-import sentry_sdk
+
 import firebase_admin
-from sentry_sdk import set_user, configure_scope
-from sentry_sdk.integrations.flask import FlaskIntegration
+import sentry_sdk
+import vertexai
 
 # from auth.api_key import verify_api_key
 from firebase_functions import https_fn, options
 from flask import Flask, request
 from flask_cors import CORS
 from pydantic import BaseModel
+from sentry_sdk import configure_scope, set_user
+from sentry_sdk.integrations.flask import FlaskIntegration
 from services.email_service import send_email
 from services.text_processor import process_text
-from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.exceptions import BadRequest, InternalServerError
 
 firebase_admin.initialize_app()
+
 logging.basicConfig(level=logging.INFO)
-options.set_global_options(timeout_sec=600)
+options.set_global_options(timeout_sec=1200, memory=512)
+
+PROJECT_ID = "report-creator-15b64"
+LOCATION = "us-central1"
+vertexai.init(project=PROJECT_ID, location=LOCATION)
+
 
 app = Flask(__name__)
 origins = [os.getenv("CORS_ORIGIN"), "http://localhost:3000"]
@@ -93,8 +101,17 @@ async def process_text_endpoint():
 
 @app.get("/test")
 async def hoge():
-    await send_email("ryo.nagaoka@gmail.com", "test")
+    await send_email("ryo.nagaoka@gmail.com", "<h1>")
     return "test"
+
+
+@app.get("/ai")
+async def ai():
+    from vertexai.generative_models import GenerativeModel
+
+    model = GenerativeModel("gemini-1.5-pro")
+    res = model.generate_content("日本の総理大臣は誰？")
+    return res.text
 
 
 @https_fn.on_request()

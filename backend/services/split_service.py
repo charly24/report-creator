@@ -1,15 +1,14 @@
 import json
 import os
 
-import typing_extensions as typing
 from vertexai.generative_models import GenerationConfig, GenerativeModel
 
-
-class Segment(typing.TypedDict):
-    start: str
-    timestamp: str
-    topic: str
-    token: str
+# import typing_extensions as typing
+# class Segment(typing.TypedDict):
+#     start: str
+#     timestamp: str
+#     topic: str
+#     token: str
 
 
 response_schema = {

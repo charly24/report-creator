@@ -1,9 +1,9 @@
-import google.generativeai as genai
 import os
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+from vertexai.generative_models import GenerativeModel
 
-model = genai.GenerativeModel(model_name=os.getenv("GEMINI_MODEL_PRO"))
+
+model = GenerativeModel(model_name=os.getenv("GEMINI_MODEL_PRO"))
 
 FORMAT_PROMPT = """
 # 命令文

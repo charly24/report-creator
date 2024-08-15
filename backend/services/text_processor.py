@@ -23,7 +23,7 @@ async def process_text(email: str, input_text: str) -> str:
     # transaction = sentry_sdk.Sentry.startTransaction({ name: "アプリ起動" });
     # Step 1: Split the text
     split_segments = await split_text(input_text)
-    if len(split_segments) > 10:
+    if len(split_segments) >= 12:
         raise ValueError("分割に失敗しました。再実行してください。")
     print(split_segments)
 

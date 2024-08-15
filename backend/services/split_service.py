@@ -1,9 +1,8 @@
-import google.generativeai as genai
-import typing_extensions as typing
 import json
 import os
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+import typing_extensions as typing
+from vertexai.generative_models import GenerationConfig, GenerativeModel
 
 
 class Segment(typing.TypedDict):
@@ -13,13 +12,21 @@ class Segment(typing.TypedDict):
     token: str
 
 
-format_model = genai.GenerativeModel(
-    model_name=os.getenv("GEMINI_MODEL_PRO"),
-    generation_config={
-        "response_mime_type": "application/json",
-        "response_schema": list[Segment],
+response_schema = {
+    "type": "ARRAY",
+    "items": {
+        "type": "OBJECT",
+        "properties": {
+            "start": {"type": "STRING"},
+            "timestamp": {"type": "STRING"},
+            "topic": {"type": "STRING"},
+            "token": {"type": "INTEGER"},
+            "confidence": {"type": "INTEGER"},
+        },
     },
-)
+}
+
+format_model = GenerativeModel(model_name=os.getenv("GEMINI_MODEL_PRO"))
 
 FORMAT_PROMPT = """
 あなたは有能なAI秘書です。コーチングセッションの文字起こしデータを、以下の制約条件に従って分割し、JSON形式で出力してください。
@@ -46,7 +53,6 @@ FORMAT_PROMPT = """
   * timestamp: セグメント内の最初のタイムスタンプ
   * topic: 分類されたtopic(最大20文字、キーワードを参考にする)
   * token: セグメント内のトークン数
-  * reason: 分割理由
   * confidence: 分割結果の信頼度
 * 1トピックに含まれるtoken数が最大トークン長を超える場合は文脈の切れ目で適切に分割してください。しかし、分割数は最小限にしてください
 * 文章の先頭に文字起こしサービスのメタ情報がある場合がありますが、それはスキップしてください
@@ -69,7 +75,13 @@ FORMAT_PROMPT = """
 
 async def split_text(text: str, cnt: int = 0) -> list:
     try:
-        response = format_model.generate_content(FORMAT_PROMPT + str(text))
+        response = format_model.generate_content(
+            FORMAT_PROMPT + str(text),
+            generation_config=GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=response_schema,
+            ),
+        )
         return json.loads(response.text)
     except Exception as e:
         if cnt < 3 and "429" not in str(e):

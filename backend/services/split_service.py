@@ -79,6 +79,7 @@ async def split_text(text: str, cnt: int = 0) -> list:
             generation_config=GenerationConfig(
                 response_mime_type="application/json",
                 response_schema=response_schema,
+                max_tokens=3000,
             ),
         )
         return json.loads(response.text)

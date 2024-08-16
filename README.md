@@ -32,8 +32,8 @@ This tool provides a system for formatting long texts, splitting them into appro
 1. Clone this repository:
 
    ```
-   git clone https://github.com/your-repo/text-formatting-tool.git
-   cd text-formatting-tool
+   git clone https://github.com/charly24/report-creator.git
+   cd report-creator
    ```
 
 2. Set up GCP credentials:
@@ -46,55 +46,13 @@ This tool provides a system for formatting long texts, splitting them into appro
 3. Deploy the Cloud Function:
 
    ```
-   gcloud functions deploy text-formatting-function \
-     --runtime python39 \
-     --trigger-http \
-     --allow-unauthenticated
+   firebase deploy --only functions
    ```
 
 4. Deploy the frontend (assuming you're using Firebase Hosting):
    ```
    firebase deploy --only hosting
    ```
-
-## Configuration
-
-### API Keys
-
-API keys are managed securely using Google Secret Manager. To set up a new API key:
-
-1. Create a secret:
-
-   ```
-   gcloud secrets create api-key --replication-policy="automatic"
-   ```
-
-2. Add a new version with the API key:
-
-   ```
-   echo -n "your-api-key" | gcloud secrets versions add api-key --data-file=-
-   ```
-
-3. Grant the Cloud Function access to the secret:
-   ```
-   gcloud secrets add-iam-policy-binding api-key \
-     --member="serviceAccount:YOUR_PROJECT_ID@appspot.gserviceaccount.com" \
-     --role="roles/secretmanager.secretAccessor"
-   ```
-
-Update the `config.py` file in the backend directory to use Secret Manager:
-
-```python
-from google.cloud import secretmanager
-
-def access_secret_version(secret_id, version_id="latest"):
-    client = secretmanager.SecretManagerServiceClient()
-    name = f"projects/{PROJECT_ID}/secrets/{secret_id}/versions/{version_id}"
-    response = client.access_secret_version(request={"name": name})
-    return response.payload.data.decode("UTF-8")
-
-API_KEY = access_secret_version("api-key")
-```
 
 ## Usage
 
@@ -127,7 +85,7 @@ API_KEY = access_secret_version("api-key")
 All used prompts and errors are logged in Cloud Logging. Access logs through the GCP Console or using the gcloud command:
 
 ```
-gcloud functions logs read text-formatting-function
+firebase functions:log
 ```
 
 ## Development
@@ -147,7 +105,7 @@ Navigate to the `backend` directory and run:
 
 ```
 pip install -r requirements.txt
-python main.py
+ENVIRONMENT=local python main.py
 ```
 
 ## Deployment from Local Environment
@@ -155,7 +113,7 @@ python main.py
 Ensure you have the gcloud CLI installed and configured. Then run:
 
 ```
-./deploy.sh
+firebase deploy
 ```
 
 This script will build the frontend and deploy both the frontend and backend to GCP.

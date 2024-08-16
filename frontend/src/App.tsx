@@ -60,13 +60,13 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <CustomizePrompt
+        {/* <CustomizePrompt
           onPromptUpdate={(splitting, formatting) => {
             setSplittingPrompt(splitting);
             setFormattingPrompt(formatting);
           }}
           onChange={setIsCustomizePtompt}
-        />
+        /> */}
         {isCustomizePtompt && (
           <div className="flex space-x-4">
             <PromptInput
@@ -103,7 +103,14 @@ const App: React.FC = () => {
         </li>
         <li>
           処理の最中にエラーが発生した場合は、エラーメッセージが表示されます。再実行することで正常に動作することもありますが、繰り返す場合は
-          <a href="https://www.facebook.com/ryo.nagaoka">長岡</a>
+          <a
+            className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+            href="https://www.facebook.com/ryo.nagaoka"
+            target="_blank"
+            rel="noreferrer"
+          >
+            長岡
+          </a>
           までご連絡いただくかどこかでmentionしてください。
         </li>
         <li>
@@ -114,14 +121,18 @@ const App: React.FC = () => {
           GeminiというAIを利用しておりますが、学習には利用しない設定です。
         </li>
         <li>
-          文字起こしが間違っている場合もありますし、このツールは100%の精度を保証するものではありません。そのため、レポート提出の前に読む方のことを考えて必ず確認・修正した後に提出してください。
+          文字起こしが間違っている場合もありますし、このツールは100%の精度を保証するものではありません。そのため、
+          <strong>
+            レポート提出の前に読む方のことを考えて必ず確認・修正した後に提出してください
+          </strong>
+          。
         </li>
       </ul>
       <h2 className="text-3xl font-bold mt-6">フォーマットの方針</h2>
       <ul className="list-disc pl-5 space-y-2">
         <li>
           文章整形:
-          文意を変えずに誤りを修正し、不要なスペースやフィラーワードを削除します。不明瞭な部分は「[不明瞭]」と記載し、可能な限り文脈から補完します。
+          文意を変えずに誤りを修正し、不要なスペースやフィラーワードを削除します。不明瞭な部分は[不明瞭]と記載し、可能な限り文脈から補完します。
         </li>
         <li>
           発言者の表記: コーチとクライアントをそれぞれ「コ: 」「ク:

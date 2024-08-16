@@ -47,7 +47,7 @@ const App: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Text Formatting Tool</h1>
+      <h1 className="text-3xl font-bold mb-6">Report Creator</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <TextInput value={inputText} onChange={setInputText} />
 
@@ -102,6 +102,13 @@ const App: React.FC = () => {
           フォーマットには文字数によりますが数分程度かかります。その間、このページを閉じたり、リロードしたりしないでください。
         </li>
         <li>
+          文字起こしが間違っている場合もありますし、このツールは100%の精度を保証するものではありません。そのため、
+          <strong>
+            レポート提出の前に読む方のことを考えて必ず確認・修正した後に提出してください。
+          </strong>
+          セッションのフェーズ分けもAIで行っていますが、必ず確認してください。
+        </li>
+        <li>
           処理の最中にエラーが発生した場合は、エラーメッセージが表示されます。再実行することで正常に動作することもありますが、繰り返す場合は
           <a
             className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
@@ -121,11 +128,7 @@ const App: React.FC = () => {
           GeminiというAIを利用しておりますが、学習には利用しない設定です。
         </li>
         <li>
-          文字起こしが間違っている場合もありますし、このツールは100%の精度を保証するものではありません。そのため、
-          <strong>
-            レポート提出の前に読む方のことを考えて必ず確認・修正した後に提出してください
-          </strong>
-          。
+          トピック分けはAIが自動で行っていますが間違う場合も多いため、必要に応じて修正してください。
         </li>
       </ul>
       <h2 className="text-3xl font-bold mt-6">フォーマットの方針</h2>

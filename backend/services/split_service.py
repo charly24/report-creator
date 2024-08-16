@@ -84,7 +84,7 @@ FORMAT_PROMPT = """
   5. まとめ：質疑応答やセッション全体のまとめなど
 * 重要: topicは最大20文字までで、上記6つの中のいずれかをキーワードを利用してください。
 * ある程度のtopic別に区切ってください。topicと、startにはtopicが始まる行の先頭15文字、文章にタイムスタンプはある場合とない場合がありますがある場合はそのタイムスタンプ、topic内に含まれるtoken数を出力してください。
-* startは、入力文と同じ文字を使ってください。その値を利用して後続プロセスで分割するので、存在しない文字列だとエラーになるため重要です。
+* 重要: startは、入力文と同じ文字を使ってください。その値を利用して後続プロセスで分割するので、存在しない文字列だとエラーになるため重要です。
 * 60分のセッションだと4~5個くらいに分割される想定で、小さく分割しすぎず、できるだけ1topic毎に最大トークン数に近くなるよう分割してください。
 * 1つのtopicで30分以上かかっている場合、最大トークン長を超えることが多いので分割して、その際topic名を"導入 (2)"のように変更してください。
 * 重要: 分割しすぎないようにして、最大でも8分割以内に抑えてください。基本的に5分割でOKですし、300分を超える文字起こしは想定していません。
@@ -104,7 +104,7 @@ FORMAT_PROMPT = """
 
 async def analyze_text(text: str, cnt: int = 0) -> list:
     try:
-        response = format_model.generate_content(
+        raw_response = format_model.generate_content(
             FORMAT_PROMPT + str(text),
             generation_config=GenerationConfig(
                 response_mime_type="application/json",
@@ -112,8 +112,19 @@ async def analyze_text(text: str, cnt: int = 0) -> list:
                 max_output_tokens=3000,
             ),
         )
-        # print(json.loads(response.text))
-        return json.loads(response.text)
+        res = json.loads(raw_response.text)
+        for topic in res["topics"]:
+            if text.find(topic["start"]) == -1:
+                raise ValueError(f"Start not found in the text: {topic['start']}")
+        if "characters" not in res:
+            raise ValueError("No characters found")
+        if "client" not in res["characters"]:
+            res["characters"]["client"] = ""
+        if "coach" not in res["characters"]:
+            res["characters"]["coach"] = ""
+        if "introducer" not in res["characters"]:
+            res["characters"]["introducer"] = ""
+        return res
     except Exception as e:
         if cnt < 3 and "429" not in str(e):
             print(

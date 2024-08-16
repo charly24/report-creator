@@ -19,6 +19,11 @@ def track_input_length(email, input_text):
 
 
 async def process_text(email: str, input_text: str) -> str:
+    if len(input_text) < 10000:
+        raise ValueError(
+            "レポート用文章でこの文字数は少なすぎます。セッションの文字起こし内容を入力してください。"
+        )
+
     track_input_length(email, input_text)
     # transaction = sentry_sdk.Sentry.startTransaction({ name: "アプリ起動" });
     # Step 1: Split the text
@@ -45,5 +50,14 @@ async def process_text(email: str, input_text: str) -> str:
 
     # Step 3: Combine formatted parts
     result = "\n\n".join(formatted_parts)
+
+    result = f"""
+<h1>セッションレポート</h1>
+<h2>1.クライアントが、コーチングを受ける背景やキャリアの状況</h2>
+<h2>2.なにが新しい挑戦を妨げているのか。</h2>
+<h2>3.なぜずっと同じ状態に居続けているのか。</h2>
+<h2>4.なぜ同じ状況にいることを許容しているのか。</h2>
+<h1>セッションログ</h1>
+{result}"""
 
     return result

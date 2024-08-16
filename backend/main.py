@@ -20,7 +20,7 @@ from sentry_sdk import configure_scope, set_user
 from sentry_sdk.integrations.flask import FlaskIntegration
 from services.email_service import send_email
 from services.text_processor import process_text
-from werkzeug.exceptions import BadRequest, InternalServerError
+from werkzeug.exceptions import BadRequest, HTTPException, InternalServerError
 
 firebase_admin.initialize_app()
 
@@ -30,7 +30,6 @@ options.set_global_options(timeout_sec=1200, memory=512)
 PROJECT_ID = "report-creator-15b64"
 LOCATION = "us-central1"
 vertexai.init(project=PROJECT_ID, location=LOCATION)
-
 
 app = Flask(__name__)
 origins = [os.getenv("CORS_ORIGIN"), "http://localhost:3000"]
@@ -50,10 +49,8 @@ sentry_sdk.init(
     # We recommend adjusting this value in production.
     profiles_sample_rate=1.0,
     integrations=[FlaskIntegration()],
-    # environment="local",
+    environment="local" if os.getenv("ENVIRONMENT") == "local" else None,
 )
-
-from werkzeug.exceptions import HTTPException
 
 
 @app.errorhandler(HTTPException)

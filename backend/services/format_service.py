@@ -59,6 +59,7 @@ FORMAT_PROMPT = """
 この制約条件に従って、入力文を最初から最後まで確実に整形してください。整形プロセスが中断しないよう注意し、完全な整形結果を提供してください。
 
 # 出力サンプル
+(出力結果のサンプルです、参考にして出力してください)
 コ: いろんなそのXさんの価値観をこう話したり、その日読んだ本であったり、見た景色、豊かさについて話して、相手の価値観がこう変わっていく。
 
 Xさんとしてワクワクするイメージになります？
@@ -66,19 +67,30 @@ Xさんとしてワクワクするイメージになります？
 ク: はい、ありがとうございます。
 
 コ: じゃあ、そうですね、ちょうど今54分ぐらいでXさんと色々とお話できたかなとは思うんですけど
+...
+
+# 登場人物
+クライアント: #クライアント#
+コーチ: #コーチ#
+紹介者: #紹介者#
 
 # 入力文
 """
 
 
-async def format_text(text: str, cnt: int = 0) -> str:
+async def format_text(text: str, characters, cnt: int = 0) -> str:
     try:
-        response = model.generate_content(FORMAT_PROMPT + str(text))
+        prompt = (
+            FORMAT_PROMPT.replace("#クライアント#", characters["client"])
+            .replace("#コーチ#", characters["coach"])
+            .replace("#紹介者#", characters["introducer"])
+        )
+        response = model.generate_content(prompt + str(text))
         return response.text
     except Exception as e:
         if cnt < 3 and "429" not in str(e):
             print(
                 f"Format時にエラーが発生したので再実行します({cnt + 1}回目): {str(e)}"
             )
-            return await format_text(text, cnt + 1)
+            return await format_text(text, characters, cnt + 1)
         raise e

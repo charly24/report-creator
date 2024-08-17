@@ -3,14 +3,6 @@ import os
 
 from vertexai.generative_models import GenerationConfig, GenerativeModel
 
-# import typing_extensions as typing
-# class Segment(typing.TypedDict):
-#     start: str
-#     timestamp: str
-#     topic: str
-#     token: str
-
-
 response_schema = {
     "type": "OBJECT",
     "properties": {
@@ -41,9 +33,8 @@ response_schema = {
     },
 }
 
-format_model = GenerativeModel(model_name=os.getenv("GEMINI_MODEL_PRO"))
 
-FORMAT_PROMPT = """
+SYSTEM_PROMPT = """
 あなたは有能なAI秘書です。コーチングセッションの文字起こしデータを、以下の制約条件に従ってtopic分割しcharacterを抽出し、JSON形式で出力してください。
 
 **想定出力**
@@ -97,21 +88,25 @@ FORMAT_PROMPT = """
   * confidence: 分割結果の信頼度
 * 1トピックに含まれるtoken数が最大トークン長を超える場合は文脈の切れ目で適切に分割してください。しかし、分割数は最小限にしてください
 * 文章の先頭に文字起こしサービスのメタ情報がある場合がありますが、それはスキップしてください。
-
-**入力文**
 """
+
+
+model = GenerativeModel(
+    model_name=os.getenv("GEMINI_MODEL_PRO"),
+    system_instruction=[
+        SYSTEM_PROMPT,
+    ],
+    generation_config=GenerationConfig(
+        response_mime_type="application/json",
+        response_schema=response_schema,
+        max_output_tokens=3000,
+    ),
+)
 
 
 async def analyze_text(text: str, cnt: int = 0) -> list:
     try:
-        raw_response = format_model.generate_content(
-            FORMAT_PROMPT + str(text),
-            generation_config=GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=response_schema,
-                max_output_tokens=3000,
-            ),
-        )
+        raw_response = model.generate_content(str(text))
         res = json.loads(raw_response.text)
         for topic in res["topics"]:
             if text.find(topic["start"]) == -1:

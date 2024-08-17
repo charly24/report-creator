@@ -3,11 +3,10 @@ import os
 from vertexai.generative_models import GenerativeModel
 
 
-model = GenerativeModel(model_name=os.getenv("GEMINI_MODEL_PRO"))
-
-FORMAT_PROMPT = """
+SYSTEM_PROMPT = """
 # 命令文
-あなたは議事録作成のプロフェッショナルです。コーチングセッションの文字起こしデータを、指定された制約条件に厳密に従って整形してください。整形は必ず入力文の最初から最後まで連続的に行い、途中で中断しないでください。
+あなたは議事録作成のプロフェッショナルです。コーチングセッションの文字起こしデータから登場人物と入力分を受け取り、指定された制約条件に厳密に従って整形してください。整形は必ず入力文の最初から最後まで連続的に行い、途中で中断しないでください。
+発注者の表記は個人情報保護のため重要なので、特に注意してください。
 
 # 前提条件
 ・入力文の内容は、コーチングセッションの文字起こしデータです。
@@ -22,7 +21,7 @@ FORMAT_PROMPT = """
 
 2. 発言者の表記:
    - コーチを"コ: "、クライアントを"ク: "として表記してください。
-   - 文中に出てくるクライアントの名前は"登場人物"も参考にして"Xさん"に変換してください。これは個人情報保護のため非常に重要です。
+   - 文中に出てくるクライアントの名前は"登場人物"も参考にして"Xさん"に変換してください。
    - クライアントを紹介してくれた方の名前は"[紹介者]"に変換してください
 
 3. 発言の整形:
@@ -65,7 +64,9 @@ FORMAT_PROMPT = """
 
 ク: (クライアントの発言内容)
 ...
+"""
 
+FORMAT_PROMPT = """
 # 登場人物
 クライアント: #クライアント#
 コーチ: #コーチ#
@@ -73,6 +74,13 @@ FORMAT_PROMPT = """
 
 # 入力文
 """
+
+model = GenerativeModel(
+    model_name=os.getenv("GEMINI_MODEL_PRO"),
+    system_instruction=[
+        SYSTEM_PROMPT,
+    ],
+)
 
 
 async def format_text(text: str, characters, cnt: int = 0) -> str:

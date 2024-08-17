@@ -34,6 +34,7 @@ async def pares_segments(input_text, segments) -> List[Dict[str, str]]:
         result.append(
             {
                 "text": segment_text,
+                "start": segment["start"],
                 "timestamp": segment["timestamp"],
                 "topic": segment["topic"],
                 "token": len(encoding.encode(segment_text)),

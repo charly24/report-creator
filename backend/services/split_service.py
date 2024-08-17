@@ -1,6 +1,8 @@
 import json
 import os
 
+from services.text_splitter import pares_segments
+
 from vertexai.generative_models import GenerationConfig, GenerativeModel
 
 response_schema = {
@@ -75,7 +77,7 @@ SYSTEM_PROMPT = """
   5. まとめ：質疑応答やセッション全体のまとめなど
 * 重要: topicは最大20文字までで、上記6つの中のいずれかをキーワードを利用してください。
 * ある程度のtopic別に区切ってください。topicと、startにはtopicが始まる行の先頭15文字、文章にタイムスタンプはある場合とない場合がありますがある場合はそのタイムスタンプ、topic内に含まれるtoken数を出力してください。
-* 重要: startは、入力文と同じ文字を使ってください。その値を利用して後続プロセスで分割するので、存在しない文字列だとエラーになるため重要です。
+* 重要: startは、必ず入力文で利用されている文字を使ってください。その値を利用して後続プロセスで分割するので、存在しない文字列だとエラーになるため重要です。
 * 60分のセッションだと4~5個くらいに分割される想定で、小さく分割しすぎず、できるだけ1topic毎に最大トークン数に近くなるよう分割してください。
 * 1つのtopicで30分以上かかっている場合、最大トークン長を超えることが多いので分割して、その際topic名を"導入 (2)"のように変更してください。
 * 重要: 分割しすぎないようにして、最大でも8分割以内に抑えてください。基本的に5分割でOKですし、300分を超える文字起こしは想定していません。
@@ -104,28 +106,34 @@ model = GenerativeModel(
 )
 
 
-async def analyze_text(text: str, cnt: int = 0) -> list:
+async def analyze_text(text: str, error: str = "", cnt: int = 0):
     try:
-        raw_response = model.generate_content(str(text))
+        raw_response = model.generate_content(f"{str(text)}\n\n{error}")
         res = json.loads(raw_response.text)
         for topic in res["topics"]:
             if text.find(topic["start"]) == -1:
                 raise ValueError(f"Start not found in the text: {topic['start']}")
         if "characters" not in res:
             raise ValueError("No characters found")
-        if "client" not in res["characters"]:
-            res["characters"]["client"] = ""
-        if "coach" not in res["characters"]:
-            res["characters"]["coach"] = ""
-        if "introducer" not in res["characters"]:
-            res["characters"]["introducer"] = ""
-        return res
+        for key in ["client", "coach", "introducer"]:
+            if key not in res["characters"]:
+                res["characters"][key] = ""
+
+        segments = await pares_segments(text, res["topics"])
+
+        for segment in segments:
+            # 6000トークン以上のセグメントがある場合はエラーという命令ですが、実際は16k程度まで許容されます
+            if segment["token"] > 16000:
+                raise ValueError(
+                    f"Topic too long: {segment['topic']}, {segment['token']} tokens, please split it."
+                )
+        return res["characters"], segments
     except Exception as e:
         if cnt < 3 and "429" not in str(e):
             print(
                 f"Split時にエラーが発生したので再実行します({cnt + 1}回目): {str(e)} "
             )
             return await analyze_text(
-                f"{text}\n\n**前回実行時エラー内容**\n{str(e)}", cnt + 1
+                text, f"**前回実行時エラー内容**\n{str(e)}", cnt + 1
             )
         raise ValueError(f"Error splitting text: {str(e)}")

@@ -2,7 +2,6 @@ import os
 
 from vertexai.generative_models import GenerativeModel
 
-
 SYSTEM_PROMPT = """
 # 命令文
 あなたは議事録作成のプロフェッショナルです。コーチングセッションの文字起こしデータから登場人物と入力分を受け取り、指定された制約条件に厳密に従って整形してください。整形は必ず入力文の最初から最後まで連続的に行い、途中で中断しないでください。

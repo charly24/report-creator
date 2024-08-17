@@ -1,5 +1,6 @@
+from typing import Dict, List
+
 import tiktoken
-from typing import List, Dict
 
 encoding = tiktoken.get_encoding("cl100k_base")
 
